@@ -1,0 +1,133 @@
+<template>
+    <article class="slds-card opportunity-card">
+        <!-- Header with name, badges, and toggle -->
+        <div class="slds-card__header slds-grid slds-grid_vertical-align-center">
+            <lightning-button-icon
+                icon-name={expandCollapseIcon}
+                alternative-text={expandCollapseTitle}
+                title={expandCollapseTitle}
+                onclick={handleToggleCollapse}
+                variant="bare"
+                size="small"
+                class="toggle-btn">
+            </lightning-button-icon>
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <a href={opportunityUrl}
+                           class="slds-card__header-link slds-truncate"
+                           title={opportunity.name}
+                           onclick={handleNavigate}>
+                            {opportunity.name}
+                        </a>
+                    </h2>
+                </div>
+                <div class="slds-no-flex badges-container">
+                    <span class={stageBadgeClass}>{opportunity.stageName}</span>
+                    <span class={closeDateBadgeClass}>{formattedCloseDate}</span>
+                </div>
+            </header>
+
+            <!-- Collapsed: inline products -->
+            <template if:true={isCollapsed}>
+                <div class="slds-no-flex collapsed-products">
+                    <template if:true={hasProducts}>
+                        <template for:each={displayedLineItems} for:item="item">
+                            <c-product-pill-popover
+                                key={item.id}
+                                product-name={item.productName}
+                                quantity={item.quantity}
+                                unit-price={item.unitPrice}
+                                total-price={item.totalPrice}
+                                description={item.description}
+                                popover-position="below">
+                            </c-product-pill-popover>
+                        </template>
+                        <template if:true={hasMoreProducts}>
+                            <span class="slds-badge slds-badge_lightest more-pill"
+                                  title={moreProductsTooltip}>
+                                +{remainingProductCount}
+                            </span>
+                        </template>
+                    </template>
+                </div>
+            </template>
+
+            <div class="slds-no-flex">
+                <lightning-button-icon
+                    icon-name="utility:edit"
+                    alternative-text="Edit"
+                    title="Edit Opportunity"
+                    onclick={handleEdit}
+                    class="slds-m-left_x-small">
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Expanded: full layout -->
+        <template if:true={isExpanded}>
+            <div class="slds-card__body slds-card__body_inner">
+                <!-- Highlight fields -->
+                <div class="slds-grid slds-wrap highlight-fields">
+                    <template for:each={highlightFieldsList} for:item="field">
+                        <div key={field.apiName} class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-5 field-item">
+                            <span class="slds-text-title_caps field-label">{field.label}</span>
+                            <div class="field-value">
+                                <template if:true={field.isCurrency}>
+                                    <lightning-formatted-number
+                                        value={field.value}
+                                        format-style="currency"
+                                        currency-code="USD">
+                                    </lightning-formatted-number>
+                                </template>
+                                <template if:true={field.isPercent}>
+                                    <lightning-formatted-number
+                                        value={field.percentValue}
+                                        format-style="percent"
+                                        maximum-fraction-digits="0">
+                                    </lightning-formatted-number>
+                                </template>
+                                <template if:true={field.isDate}>
+                                    <lightning-formatted-date-time
+                                        value={field.value}>
+                                    </lightning-formatted-date-time>
+                                </template>
+                                <template if:true={field.isText}>
+                                    {field.value}
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Product pills -->
+                <div class="slds-m-top_small products-section">
+                    <template if:true={hasProducts}>
+                        <div class="pills-wrapper">
+                            <template for:each={displayedLineItems} for:item="item">
+                                <c-product-pill-popover
+                                    key={item.id}
+                                    product-name={item.productName}
+                                    quantity={item.quantity}
+                                    unit-price={item.unitPrice}
+                                    total-price={item.totalPrice}
+                                    description={item.description}>
+                                </c-product-pill-popover>
+                            </template>
+                            <template if:true={hasMoreProducts}>
+                                <span class="slds-badge slds-badge_lightest more-pill"
+                                      title={moreProductsTooltip}
+                                      onclick={handleShowMoreProducts}>
+                                    +{remainingProductCount} more
+                                </span>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={hasProducts}>
+                        <span class="slds-text-color_weak slds-text-body_small">No products</span>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </article>
+</template>
